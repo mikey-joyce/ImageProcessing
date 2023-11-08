@@ -93,6 +93,11 @@ if __name__ == '__main__':
 
     ret, markers = cv2.connectedComponents(b)
 
+    areas = []
+    for i in range(1, ret):
+        a = np.sum(markers == i)
+        areas.append(a)
+
     markers += 1
     markers[other == 255] = 0
     fig, ax = plt.subplots(figsize=(5, 5))
@@ -100,11 +105,6 @@ if __name__ == '__main__':
     ax.imshow(markers)
     ax.axis('off')
     plt.show()
-
-    areas = []
-    for i in range(1, ret):
-        a = np.sum(markers == i)
-        areas.append(a)
 
     areas.pop(0)
     plt.hist(areas, bins=50, color='b', alpha=0.7)
