@@ -121,18 +121,12 @@ def kernel(x=5, sigma=0.1):
     return k/np.sum(k)
 
 
-if __name__ == '__main__':
-    img = 'images/Naka1_small.tif'
-    img = cv2.imread(img, cv2.IMREAD_UNCHANGED)
-    plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-    plt.show()
-
-    # partA(img)
-    Ix = np.diff(img.copy(), axis=1)
+def partB(im):
+    Ix = np.diff(im.copy(), axis=1)
     plt.imshow(cv2.cvtColor(Ix, cv2.COLOR_BGR2RGB))
     plt.show()
 
-    Iy = np.diff(img.copy(), axis=0)
+    Iy = np.diff(im.copy(), axis=0)
     plt.imshow(cv2.cvtColor(Iy, cv2.COLOR_BGR2RGB))
     plt.show()
 
@@ -148,3 +142,12 @@ if __name__ == '__main__':
     plt.hist(theta.flatten(), bins=360, range=(0, 360))
     plt.show()
 
+
+if __name__ == '__main__':
+    img = 'images/Naka1_small.tif'
+    img = cv2.imread(img, cv2.IMREAD_UNCHANGED)
+    plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+    plt.show()
+
+    # partA(img)
+    # partB(img)
