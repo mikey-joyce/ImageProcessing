@@ -2,6 +2,8 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 import time
+import math
+from scipy.signal import convolve2d
 
 
 def affine_helper(im, translation):
@@ -105,7 +107,7 @@ def partA(im):
     #plt.show()
 
     start = time.time()
-    img_fill = Fill(im, 500, 1, 1000, 800, 150)
+    img_fill = Fill(im.copy(), 500, 1, 1000, 800, 150)
     print(str(time.time() - start) + " s")
 
     cv2.imwrite('images/Naka1_fill.jpg', img_fill)
@@ -113,33 +115,44 @@ def partA(im):
     #plt.show()
 
 
-def kernel(x=5, sigma=0.1):
-    axis = np.square(np.linspace(-(x-1)/2., (x-1)/2., x))
-    gaussian = np.exp((-0.5*axis)/np.square(sigma))
-    k = np.outer(gaussian, gaussian)
+def partB(im, scale=1):
+    if scale == 1:
+        name1 = 'images/Naka1_Ix.jpg'
+        name2 = 'images/Naka1_Iy.jpg'
+        name3 = 'images/Naka1_M.jpg'
+        sobel_x = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
+        sobel_y = np.array([[1, 2, 1], [0, 0, 0], [-1, -2, -1]])
+    else:
+        name1 = 'images/Naka1_Ix_large.jpg'
+        name2 = 'images/Naka1_Iy_large.jpg'
+        name3 = 'images/Naka1_M_large.jpg'
+        sobel_x = np.array([[-2, -1, 0, 1, 2], [-2, -1, 0, 1, 2], [-4, -2, 0, 2, 4], [-2, -1, 0, 1, 2], [-2, -1, 0, 1, 2]])
+        sobel_y = np.array([[2, 2, 4, 2, 2], [1, 1, 2, 1, 1], [0, 0, 0, 0, 0], [-1, -1, -2, -1, -1], [-2, -2, -4, -2, -2]])
 
-    return k/np.sum(k)
+    Ix = convolve2d(im, sobel_x, mode='same', boundary='symm')
+    cv2.imwrite(name1, Ix)
+    #plt.imshow(cv2.cvtColor(Ix, cv2.COLOR_BGR2RGB))
+    #plt.show()
 
+    Iy = convolve2d(im, sobel_y, mode='same', boundary='symm')
+    cv2.imwrite(name2, Iy)
+    #plt.imshow(cv2.cvtColor(Iy, cv2.COLOR_BGR2RGB))
+    #plt.show()
 
-def partB(im):
-    Ix = np.diff(im.copy(), axis=1)
-    plt.imshow(cv2.cvtColor(Ix, cv2.COLOR_BGR2RGB))
-    plt.show()
+    M = np.sqrt((np.square(Ix) + np.square(Iy)))
+    cv2.imwrite(name3, M)
+    #plt.imshow(cv2.cvtColor(M_show, cv2.COLOR_BGR2RGB))
+    #plt.show()
 
-    Iy = np.diff(im.copy(), axis=0)
-    plt.imshow(cv2.cvtColor(Iy, cv2.COLOR_BGR2RGB))
-    plt.show()
+    theta = []
+    for i in range(Ix.shape[0]):
+        for j in range(Ix.shape[1]):
+            angle = math.degrees(math.atan2(Ix[i][j], Iy[i][j]))
+            if angle < 0:
+                angle += 360
+            theta.append(angle)
 
-    Ix, Iy = Ix[:-1, :], Iy[:, :-1]
-    M = np.sqrt((np.square(Ix) + np.square(Iy)).astype(float)).astype(np.uint8)
-    M_show = np.clip(10 * M, 0, 255).astype(np.uint8)
-    plt.imshow(cv2.cvtColor(M_show, cv2.COLOR_BGR2RGB))
-    plt.show()
-
-    theta = np.degrees(np.arctan(Iy, Ix, casting='unsafe'))
-    print('Angles: ', theta)
-
-    plt.hist(theta.flatten(), bins=360, range=(0, 360))
+    plt.hist(theta, bins=360, range=(0, 360))
     plt.show()
 
 
@@ -149,5 +162,6 @@ if __name__ == '__main__':
     plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
     plt.show()
 
-    # partA(img)
-    # partB(img)
+    partA(img)
+    partB(img)
+    partB(img, 2)
